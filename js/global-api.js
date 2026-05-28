@@ -1,67 +1,24 @@
-/* ═══════════════════════════════════════════════════
-   GLOBAL-API.JS — Expõe funções globais para HTML
-═══════════════════════════════════════════════════ */
-// Este ficheiro faz a ponte entre módulos ES6 e HTML inline onclick
+// global-api.js - Versão definitiva: importa todos os módulos e expõe globalmente
 
-import { S, load, save, seed, dailyReset, todayKey, yesterdayKey } from './state.js';
-import { renderHome } from '../modules/home.js';
-import { renderKanban, openKanbanModal, saveKanban, moveCard, delCard, toggleSub, addSubtask, filterKanban, onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop } from '../modules/kanban.js';
-import { renderRitmos, openRitoModal, saveRito, toggleRito, delRito } from '../modules/ritmos.js';
-import { renderRoadmap, openPhaseModal, savePhase, toggleSkill, togglePhaseBody, delPhase } from '../modules/roadmap.js';
-import { renderMetrics, setPeriod } from '../modules/metrics.js';
-import { renderProfile, openAvatarModal, saveProfile, pickAvatar } from '../modules/profile.js';
-import { checkAchievements } from './achievements.js';
-import { renderNotes, renderQuickTodos, saveNote, pinNote, delNote, addQuickTodo, toggleQuickTodo, setCaptureTab, insertMd, togglePreview } from '../modules/capture.js';
+// Importa todos os módulos como objetos
+import * as stateModule from './state.js';
+import * as homeModule from '../modules/home.js';
+import * as kanbanModule from '../modules/kanban.js';
+import * as ritmosModule from '../modules/ritmos.js';
+import * as roadmapModule from '../modules/roadmap.js';
+import * as metricsModule from '../modules/metrics.js';
+import * as profileModule from '../modules/profile.js';
+import * as captureModule from '../modules/capture.js';
+import * as achievementsModule from './achievements.js';
 
-// ── KANBAN ──
-window.openKanbanModal = openKanbanModal;
-window.saveKanban = saveKanban;
-window.moveCard = moveCard;
-window.delCard = delCard;
-window.toggleSub = toggleSub;
-window.addSubtask = addSubtask;
-window.filterKanban = filterKanban;
-window.onDragStart = onDragStart;
-window.onDragEnd = onDragEnd;
-window.onDragOver = onDragOver;
-window.onDragLeave = onDragLeave;
-window.onDrop = onDrop;
+// Extrai as funções que precisamos (mas vamos expor todas)
+const { S, load, save, seed, dailyReset, todayKey, yesterdayKey } = stateModule;
 
-// ── RITMOS ──
-window.openRitoModal = openRitoModal;
-window.saveRito = saveRito;
-window.toggleRito = toggleRito;
-window.delRito = delRito;
+// ─────────────────────────────────────────────────────────────
+// FUNÇÕES GLOBAIS DEFINIDAS AQUI (navegação, timer, tema, etc.)
+// ─────────────────────────────────────────────────────────────
 
-// ── ROADMAP ──
-window.openPhaseModal = openPhaseModal;
-window.savePhase = savePhase;
-window.toggleSkill = toggleSkill;
-window.togglePhaseBody = togglePhaseBody;
-window.delPhase = delPhase;
-
-// ── CAPTURA ──
-window.saveNote = saveNote;
-window.pinNote = pinNote;
-window.delNote = delNote;
-window.addQuickTodo = addQuickTodo;
-window.toggleQuickTodo = toggleQuickTodo;
-window.setCaptureTab = setCaptureTab;
-window.insertMd = insertMd;
-window.togglePreview = togglePreview;
-window.renderNotes = renderNotes;
-window.renderQuickTodos = renderQuickTodos;
-
-// ── METRICS ──
-window.setPeriod = setPeriod;
-window.renderMetrics = renderMetrics;
-
-// ── PROFILE ──
-window.openAvatarModal = openAvatarModal;
-window.saveProfile = saveProfile;
-window.pickAvatar = pickAvatar;
-
-// ── NAVEGAÇÃO GLOBAL ──
+// Navegação
 window.navigate = function(screenId, btn) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -69,34 +26,35 @@ window.navigate = function(screenId, btn) {
   if (screen) {
     screen.classList.add('active');
     if (btn) btn.classList.add('active');
-    const renders = { home: renderHome, kanban: renderKanban, ritmos: renderRitmos, roadmap: renderRoadmap, metrics: renderMetrics, profile: renderProfile };
+    const renders = { 
+      home: homeModule.renderHome, 
+      kanban: kanbanModule.renderKanban, 
+      ritmos: ritmosModule.renderRitmos, 
+      roadmap: roadmapModule.renderRoadmap, 
+      metrics: metricsModule.renderMetrics, 
+      profile: profileModule.renderProfile 
+    };
     if (renders[screenId]) renders[screenId]();
   }
 };
 
-// ── MODAIS ──
-window.openModal = function(id) { document.getElementById(id)?.classList.add('open'); };
-window.closeModal = function(id) { document.getElementById(id)?.classList.remove('open'); };
+// Modais
+window.openModal = (id) => document.getElementById(id)?.classList.add('open');
+window.closeModal = (id) => document.getElementById(id)?.classList.remove('open');
 
-// ── CAPTURA ──
+// Capture drawer
 window.openCapture = function() {
   document.getElementById('captureOverlay')?.classList.add('open');
   document.getElementById('captureDrawer')?.classList.add('open');
-  renderNotes();
-  renderQuickTodos();
+  if (captureModule.renderNotes) captureModule.renderNotes();
+  if (captureModule.renderQuickTodos) captureModule.renderQuickTodos();
 };
 window.closeCapture = function() {
   document.getElementById('captureOverlay')?.classList.remove('open');
   document.getElementById('captureDrawer')?.classList.remove('open');
 };
 
-// ── RENDER METRICS (requer chart.js) ──
-window.renderMetrics = async function() {
-  const mod = await import('../modules/metrics.js');
-  mod.renderMetrics();
-};
-
-// ── AUTOSAVE ──
+// Autosave
 let _asTimer = null;
 window.autosave = function() {
   clearTimeout(_asTimer);
@@ -108,7 +66,7 @@ window.autosave = function() {
   }, 600);
 };
 
-// ── TIMER ──
+// Timer (versão completa, adaptada do seu código)
 const MODES = [25, 50, 90];
 let timerMode = 0, timerRunning = false, timerSecs = 25 * 60, timerInterval = null, timerStartTime = null, timerCategory = 'academico';
 
@@ -117,6 +75,70 @@ function updateTimerDisplay() {
   const s = (timerSecs % 60).toString().padStart(2, '0');
   const el = document.getElementById('timerDisplay');
   if (el) el.textContent = m + ':' + s;
+}
+
+function recordSession(secs) {
+  if (secs < 30) return;
+  const now = new Date();
+  const key = now.toISOString().slice(0, 10);
+  if (!S.timerSessions[key]) S.timerSessions[key] = {};
+  S.timerSessions[key][timerCategory] = (S.timerSessions[key][timerCategory] || 0) + secs;
+  S.sessions.push({ cat: timerCategory, secs, start: now.toISOString() });
+  achievementsModule.checkAchievements();
+  save();
+  if (homeModule.renderHome) homeModule.renderHome();
+}
+
+function gainXP(amount, x, y) {
+  if (x != null && y != null) xpBurst('+' + amount + ' XP', x, y);
+  S.xp += amount;
+  S.gold += Math.floor(amount / 10);
+  let levelUp = false;
+  const xpForLevel = (lvl) => Math.floor(120 * Math.pow(1.3, lvl - 1));
+  while (S.xp >= xpForLevel(S.level)) {
+    S.xp -= xpForLevel(S.level);
+    S.level++;
+    levelUp = true;
+  }
+  if (levelUp) setTimeout(() => window.toast(`⚡ Nível ${S.level}! Continue assim.`), 500);
+  save();
+  updateHero();
+  achievementsModule.checkAchievements();
+}
+
+function xpBurst(text, x, y) {
+  const el = document.createElement('div');
+  el.className = 'xp-burst';
+  el.textContent = text;
+  el.style.cssText = `left:${x - 28}px;top:${y - 20}px;color:var(--accent2)`;
+  document.getElementById('fxLayer')?.appendChild(el);
+  setTimeout(() => el.remove(), 1400);
+}
+
+function updateHero() {
+  const LEVELS = ['Explorador', 'Aprendiz', 'Estudioso', 'Praticante', 'Analista', 'Especialista', 'Mestre', 'Sábio', 'Lendário', 'Transcendente'];
+  const xpForLevel = (lvl) => Math.floor(120 * Math.pow(1.3, lvl - 1));
+  const xpN = xpForLevel(S.level);
+  const cur = S.xp % xpN;
+  const pct = Math.min(100, Math.round(cur / xpN * 100));
+  const lvlName = LEVELS[Math.min(S.level - 1, LEVELS.length - 1)];
+  
+  const avatarEl = document.getElementById('avatarEmoji');
+  if (avatarEl) avatarEl.textContent = S.avatar;
+  const badgeEl = document.getElementById('avatarLvlBadge');
+  if (badgeEl) badgeEl.textContent = S.level;
+  const nameEl = document.getElementById('heroName');
+  if (nameEl) nameEl.textContent = S.name || 'Clica para definir nome';
+  const classEl = document.getElementById('heroClass');
+  if (classEl) classEl.textContent = `Nível ${S.level} — ${lvlName}`;
+  const xpEl = document.getElementById('xpText');
+  if (xpEl) xpEl.textContent = `${cur} / ${xpN} XP`;
+  const pctEl = document.getElementById('xpPct');
+  if (pctEl) pctEl.textContent = `${pct}%`;
+  const barEl = document.getElementById('xpBar');
+  if (barEl) barEl.style.width = pct + '%';
+  const goldEl = document.getElementById('statGold');
+  if (goldEl) goldEl.textContent = S.gold || 0;
 }
 
 window.toggleTimer = function() {
@@ -178,71 +200,7 @@ window.cycleTimerMode = function() {
   if (!timerRunning) document.getElementById('timerLbl').textContent = 'Pronto para começar';
 };
 
-function recordSession(secs) {
-  if (secs < 30) return;
-  const now = new Date();
-  const key = now.toISOString().slice(0, 10);
-  if (!S.timerSessions[key]) S.timerSessions[key] = {};
-  S.timerSessions[key][timerCategory] = (S.timerSessions[key][timerCategory] || 0) + secs;
-  S.sessions.push({ cat: timerCategory, secs, start: now.toISOString() });
-  checkAchievements();
-  save();
-  renderHome();
-}
-
-function gainXP(amount, x, y) {
-  if (x != null && y != null) xpBurst('+' + amount + ' XP', x, y);
-  S.xp += amount;
-  S.gold += Math.floor(amount / 10);
-  let levelUp = false;
-  const xpForLevel = (lvl) => Math.floor(120 * Math.pow(1.3, lvl - 1));
-  while (S.xp >= xpForLevel(S.level)) {
-    S.xp -= xpForLevel(S.level);
-    S.level++;
-    levelUp = true;
-  }
-  if (levelUp) setTimeout(() => window.toast(`⚡ Nível ${S.level}! Continue assim.`), 500);
-  save();
-  updateHero();
-  checkAchievements();
-}
-
-function xpBurst(text, x, y) {
-  const el = document.createElement('div');
-  el.className = 'xp-burst';
-  el.textContent = text;
-  el.style.cssText = `left:${x - 28}px;top:${y - 20}px;color:var(--accent2)`;
-  document.getElementById('fxLayer')?.appendChild(el);
-  setTimeout(() => el.remove(), 1400);
-}
-
-function updateHero() {
-  const LEVELS = ['Explorador', 'Aprendiz', 'Estudioso', 'Praticante', 'Analista', 'Especialista', 'Mestre', 'Sábio', 'Lendário', 'Transcendente'];
-  const xpForLevel = (lvl) => Math.floor(120 * Math.pow(1.3, lvl - 1));
-  const xpN = xpForLevel(S.level);
-  const cur = S.xp % xpN;
-  const pct = Math.min(100, Math.round(cur / xpN * 100));
-  const lvlName = LEVELS[Math.min(S.level - 1, LEVELS.length - 1)];
-  
-  const avatarEl = document.getElementById('avatarEmoji');
-  if (avatarEl) avatarEl.textContent = S.avatar;
-  const badgeEl = document.getElementById('avatarLvlBadge');
-  if (badgeEl) badgeEl.textContent = S.level;
-  const nameEl = document.getElementById('heroName');
-  if (nameEl) nameEl.textContent = S.name || 'Clica para definir nome';
-  const classEl = document.getElementById('heroClass');
-  if (classEl) classEl.textContent = `Nível ${S.level} — ${lvlName}`;
-  const xpEl = document.getElementById('xpText');
-  if (xpEl) xpEl.textContent = `${cur} / ${xpN} XP`;
-  const pctEl = document.getElementById('xpPct');
-  if (pctEl) pctEl.textContent = `${pct}%`;
-  const barEl = document.getElementById('xpBar');
-  if (barEl) barEl.style.width = pct + '%';
-  const goldEl = document.getElementById('statGold');
-  if (goldEl) goldEl.textContent = S.gold || 0;
-}
-
-// ── THEME ──
+// Tema
 window.applyTheme = function(id) {
   S.theme = id;
   document.body.setAttribute('data-theme', id === 'dark' ? '' : id);
@@ -250,11 +208,11 @@ window.applyTheme = function(id) {
   const colors = { dark: '#0e0e16', fantasy: '#080612', light: '#f2f2f8', highcontrast: '#000000' };
   if (mc) mc.content = colors[id] || '#0e0e16';
   save();
-  renderProfile();
+  if (profileModule.renderProfile) profileModule.renderProfile();
   window.toast('🎨 Tema aplicado!');
 };
 
-// ── CHIP SELECT ──
+// Chip select
 window.selectChip = function(el, hiddenId) {
   const group = el.closest('.chip-group');
   group?.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
@@ -263,7 +221,7 @@ window.selectChip = function(el, hiddenId) {
   if (inp) inp.value = el.dataset.val || '';
 };
 
-// ── TOAST ──
+// Toast
 window.toast = function(msg) {
   const el = document.createElement('div');
   el.className = 'toast';
@@ -272,7 +230,32 @@ window.toast = function(msg) {
   setTimeout(() => el.remove(), 2900);
 };
 
-// ── INIT ON LOAD ──
+// ─────────────────────────────────────────────────────────────
+// EXPOR TODAS AS FUNÇÕES DOS MÓDULOS PARA window
+// ─────────────────────────────────────────────────────────────
+// Isso inclui: kanban, ritmos, roadmap, metrics, profile, capture, e também state se necessário
+
+const allModules = [kanbanModule, ritmosModule, roadmapModule, metricsModule, profileModule, captureModule, achievementsModule];
+
+allModules.forEach(module => {
+  Object.keys(module).forEach(key => {
+    const value = module[key];
+    if (typeof value === 'function' && !window[key]) {
+      window[key] = value;
+    }
+  });
+});
+
+// Também expomos as funções de state se necessário (ex: save, load, etc.)
+if (stateModule.save && !window.save) window.save = stateModule.save;
+if (stateModule.load && !window.load) window.load = stateModule.load;
+if (stateModule.seed && !window.seed) window.seed = stateModule.seed;
+if (stateModule.dailyReset && !window.dailyReset) window.dailyReset = stateModule.dailyReset;
+
+// Para garantir que renderHome seja chamada no início (já está no homeModule)
+window.renderHome = homeModule.renderHome;
+
+// Inicialização no DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
   load();
   seed();
@@ -281,10 +264,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const mc = document.getElementById('themeColorMeta');
   const colors = { dark:'#0e0e16', fantasy:'#080612', light:'#f2f2f8', highcontrast:'#000000' };
   if (mc) mc.content = colors[S.theme] || '#0e0e16';
-  renderHome();
-  renderKanban();
-  renderRitmos();
-  renderRoadmap();
-  checkAchievements();
+  if (homeModule.renderHome) homeModule.renderHome();
+  if (kanbanModule.renderKanban) kanbanModule.renderKanban();
+  if (ritmosModule.renderRitmos) ritmosModule.renderRitmos();
+  if (roadmapModule.renderRoadmap) roadmapModule.renderRoadmap();
+  achievementsModule.checkAchievements();
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 });
