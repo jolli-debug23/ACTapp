@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" id="themeColorMeta" content="#0e0e16">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Lab Pessoal — organização com equilíbrio e dados reais">
+<title>Lab Pessoal</title>
+<link rel="manifest" href="./manifest.json">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/base.css">
+<link rel="stylesheet" href="./css/themes.css">
+<link rel="stylesheet" href="./css/components.css">
+<link rel="stylesheet" href="./css/layout.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- FX LAYER -->
+<div id="fxLayer" style="position:fixed;inset:0;pointer-events:none;z-index:9999"></div>
+
+<!-- AUTOSAVE PILL -->
+<div class="autosave-pill" id="autosavePill">✓ guardado</div>
+
+<!-- TOAST STACK -->
+<div class="toast-stack" id="toastStack"></div>
+
+<!-- ACHIEVEMENT POPUP -->
+<div class="ach-popup" id="achPopup">
+  <span class="ach-popup-icon" id="achPopupIcon">🏅</span>
+  <div><div class="ach-popup-label">Conquista Desbloqueada</div><div class="ach-popup-name" id="achPopupName">—</div></div>
+</div>
+
+<div id="app">
+
+<!-- ═══════════ TELA: HOME ═══════════ -->
+<div class="screen active" id="screen-home">
+  <div class="hero-strip">
+    <div class="avatar-ring" id="avatarEl" onclick="openAvatarModal()">
+      <span id="avatarEmoji">🧙</span>
+      <div class="avatar-lvl-badge" id="avatarLvlBadge">1</div>
+    </div>
+    <div class="hero-info">
+      <div class="hero-name" id="heroName">Clica para definir nome</div>
+      <div class="hero-class" id="heroClass">Nível 1 — Explorador</div>
+      <div class="hero-xp">
+        <div class="hero-xp-row"><span class="hero-xp-label" id="xpText">0 / 100 XP</span><span class="hero-xp-label" id="xpPct">0%</span></div>
+        <div class="progress-bar"><div class="progress-fill pb-accent" id="xpBar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-area">
+    <!-- Timer -->
+    <div class="timer-card">
+      <div class="timer-cat" style="margin-bottom:16px"><select id="timerCat" onchange="autosave()"><option value="academico">🎓 Académico</option><option value="carreira">💻 Carreira</option><option value="arte">🎨 Arte & Expressão</option><option value="saude">💚 Saúde & Descanso</option></select></div>
+      <div class="timer-display" id="timerDisplay">25:00</div>
+      <div class="timer-lbl" id="timerLbl">Pronto para começar</div>
+      <div class="timer-btns">
+        <button class="btn btn-primary btn-sm" onclick="toggleTimer()"><span id="timerBtnText">▶ Iniciar</span></button>
+        <button class="btn btn-ghost btn-sm" onclick="resetTimer()">↺ Reset</button>
+        <button class="btn btn-ghost btn-sm" onclick="cycleTimerMode()" id="timerModeBtn">🍅 25min</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="summary-grid">
+      <div class="summary-card"><div class="summary-num" id="sumPending">0</div><div class="summary-lbl">Quests pendentes</div></div>
+      <div class="summary-card"><div class="summary-num" id="sumHabits">0/0</div><div class="summary-lbl">Ritmos hoje</div></div>
+      <div class="summary-card"><div class="summary-num" id="sumStreak" style="color:var(--warn)">0🔥</div><div class="summary-lbl">Maior streak</div></div>
+      <div class="summary-card"><div class="summary-num" id="sumSessions" style="color:var(--sky)">0h</div><div class="summary-lbl">Foco esta semana</div></div>
+    </div>
+
+    <!-- Alerta -->
+    <div class="balance-alert" id="balanceAlert">
+      <span class="balance-alert-icon">🌱</span>
+      <div class="balance-alert-text"><strong>Laboratório nota:</strong> Há mais de 7 dias sem registo de Arte & Expressão. Dado, não julgamento — como estás?</div>
+    </div>
+
+    <!-- Streaks -->
+    <div class="section-heading">Constância</div>
+    <div class="streak-scroll" id="streakRow"></div>
+  </div>
+</div>
+
+<!-- ═══════════ TELA: KANBAN ═══════════ -->
+<div class="screen" id="screen-kanban">
+  <div class="screen-header"><div><div class="screen-title">Kanban</div><div class="screen-sub">Pendências com prazo</div></div><button class="btn btn-primary btn-sm" onclick="openKanbanModal()">+ Nova</button></div>
+  <div class="scroll-area">
+    <div class="kanban-toolbar">
+      <div class="chip active" data-filter="all" onclick="filterKanban('all',this)">Todos</div>
+      <div class="chip" data-filter="academico" onclick="filterKanban('academico',this)">🎓 Académico</div>
+      <div class="chip" data-filter="carreira" onclick="filterKanban('carreira',this)">💻 Carreira</div>
+      <div class="chip" data-filter="arte" onclick="filterKanban('arte',this)">🎨 Arte</div>
+    </div>
+    <div class="kanban-cols" id="kanbanCols"></div>
+  </div>
+</div>
+
+<!-- ═══════════ TELA: RITMOS ═══════════ -->
+<div class="screen" id="screen-ritmos">
+  <div class="screen-header"><div><div class="screen-title">Ritmos</div><div class="screen-sub">Combustível do dia</div></div><button class="btn btn-primary btn-sm" onclick="openRitoModal()">+ Novo</button></div>
+  <div class="scroll-area">
+    <div id="heatmapWrap"></div>
+    <div class="ritmos-section"><div class="ritmos-section-title">⚙️ Manutenção Obrigatória</div><div id="ritosManuList"></div></div>
+    <div class="ritmos-section"><div class="ritmos-section-title">🎨 Abastecimento Criativo</div><div id="ritosAbasList"></div></div>
+  </div>
+</div>
+
+<!-- ═══════════ TELA: ROADMAP ═══════════ -->
+<div class="screen" id="screen-roadmap">
+  <div class="screen-header"><div><div class="screen-title">Roadmap</div><div class="screen-sub">Jornada de longo prazo</div></div><button class="btn btn-primary btn-sm" onclick="openPhaseModal()">+ Fase</button></div>
+  <div class="scroll-area">
+    <div style="background:var(--accent-dim);border:1.5px solid var(--accent);border-radius:var(--r);padding:16px;margin-bottom:20px;font-size:0.95rem;color:var(--accent2);line-height:1.6">🔭 <strong>Espaço estratégico.</strong> Consulta quando precisares de norte — não de ansiedade diária.</div>
+    <div id="roadmapContainer"></div>
+  </div>
+</div>
+
+<!-- ═══════════ TELA: MÉTRICAS ═══════════ -->
+<div class="screen" id="screen-metrics">
+  <div class="screen-header"><div><div class="screen-title">Métricas</div><div class="screen-sub">Laboratório de dados</div></div></div>
+  <div class="scroll-area">
+    <div class="period-chips">
+      <div class="period-chip active" onclick="setPeriod('day',this)">Hoje</div>
+      <div class="period-chip" onclick="setPeriod('week',this)">Semana</div>
+      <div class="period-chip" onclick="setPeriod('month',this)">Mês</div>
+    </div>
+    <div class="balance-score-card">
+      <div class="balance-score-label">Score de equilíbrio</div>
+      <div class="balance-score-num" id="balanceScore">—</div>
+      <div class="balance-score-note" id="balanceNote">Usa o timer para gerar dados</div>
+      <div class="balance-bars" id="balanceBars"></div>
+    </div>
+    <div class="records-grid">
+      <div class="record-card"><span class="record-icon">⏱️</span><div class="record-val" id="recBestDay">—</div><div class="record-lbl">Melhor dia (min)</div></div>
+      <div class="record-card"><span class="record-icon">🔥</span><div class="record-val" id="recMaxStreak">—</div><div class="record-lbl">Maior streak</div></div>
+      <div class="record-card"><span class="record-icon">🎨</span><div class="record-val" id="recArtHours">—</div><div class="record-lbl">Total Arte (h)</div></div>
+      <div class="record-card"><span class="record-icon">✅</span><div class="record-val" id="recTasksDone">—</div><div class="record-lbl">Quests concluídas</div></div>
+    </div>
+    <div class="chart-card"><div class="chart-title">⏱ Minutos por Categoria</div><div class="chart-wrap"><canvas id="chartCats"></canvas></div><div class="cat-legend" id="catLegend"></div></div>
+    <div class="chart-card"><div class="chart-title">🧬 Balanço de Energia</div><div class="chart-wrap" style="height:220px"><canvas id="chartBalance"></canvas></div></div>
+    <div class="chart-card"><div class="chart-title">📈 Foco Diário (7 dias)</div><div class="chart-wrap"><canvas id="chartLine"></canvas></div></div>
+    <div class="section-heading">Sessões Recentes</div>
+    <div id="sessionsList"></div>
+  </div>
+</div>
+
+<!-- ═══════════ TELA: PERFIL ═══════════ -->
+<div class="screen" id="screen-profile">
+  <div class="profile-hero">
+    <div class="profile-avatar" onclick="openAvatarModal()"><span id="profileAvatarEmoji">🧙</span></div>
+    <div class="profile-name" id="profileName">—</div>
+    <div class="profile-class" id="profileClass">Nível 1 — Explorador</div>
+    <div class="profile-xp-wrap">
+      <div class="hero-xp-row" style="margin-bottom:8px"><span class="hero-xp-label" id="xpText2">0/100 XP</span></div>
+      <div class="progress-bar"><div class="progress-fill pb-accent" id="xpBar2" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="scroll-area">
+    <div class="section-heading">🏅 Conquistas</div>
+    <div class="ach-grid" id="achGrid"></div>
+    <div class="section-heading">🎨 Temas</div>
+    <div class="themes-grid" id="themesGrid"></div>
+    <div class="section-heading">🧬 Avatar</div>
+    <div class="chip-group" id="avatarPickerProfile" style="justify-content:center;font-size:1.6rem"></div>
+  </div>
+</div>
+
+<!-- NAV BAR -->
+<nav class="nav-bar">
+  <button class="nav-item active" onclick="navigate('home',this)"><span class="nav-icon">🏠</span><span class="nav-label">Lab</span></button>
+  <button class="nav-item" onclick="navigate('kanban',this)"><span class="nav-icon">📋</span><span class="nav-label">Kanban</span></button>
+  <button class="nav-item" onclick="navigate('ritmos',this)"><span class="nav-icon">🌀</span><span class="nav-label">Ritmos</span></button>
+  <button class="nav-item" onclick="navigate('roadmap',this)"><span class="nav-icon">🗺️</span><span class="nav-label">Mapa</span></button>
+  <button class="nav-item" onclick="navigate('metrics',this)"><span class="nav-icon">📊</span><span class="nav-label">Lab</span></button>
+  <button class="nav-item" onclick="navigate('profile',this)"><span class="nav-icon">✨</span><span class="nav-label">Perfil</span></button>
+</nav>
+
+</div>
+
+<!-- CAPTURE FAB -->
+<button class="capture-fab" onclick="openCapture()">✏️</button>
+
+<!-- ═══════════ DRAWER: CAPTURA ═══════════ -->
+<div class="drawer-overlay" id="captureOverlay" onclick="closeCapture()"></div>
+<div class="drawer" id="captureDrawer">
+  <div class="drawer-handle"></div>
+  <div class="flex justify-between items-center mb-6">
+    <div class="drawer-title">✏️ Captura Rápida</div>
+    <button class="btn-close btn" onclick="closeCapture()">✕</button>
+  </div>
+  <div class="capture-tabs">
+    <div class="capture-tab active" onclick="setCaptureTab('insight',this)">💡 Insight</div>
+    <div class="capture-tab" onclick="setCaptureTab('todo',this)">✓ To-Do</div>
+  </div>
+  <!-- INSIGHT -->
+  <div class="capture-panel active" id="captureInsight">
+    <div class="form-group"><select id="noteTag"><option value="arte">🎨 Arte / Música</option><option value="livro">📖 Escrita / Livro</option><option value="carreira">💻 Carreira</option><option value="pessoal">💭 Pessoal</option></select></div>
+    <div class="note-toolbar">
+      <button class="note-tb-btn" title="Negrito" onclick="insertMd('**','**')"><b>B</b></button>
+      <button class="note-tb-btn" title="Itálico" onclick="insertMd('_','_')"><i>I</i></button>
+      <button class="note-tb-btn" title="Código" onclick="insertMd('`','`')">⌨</button>
+      <button class="note-tb-btn" title="H1" onclick="insertMd('# ','')">H1</button>
+      <button class="note-tb-btn" title="H2" onclick="insertMd('## ','')">H2</button>
+      <button class="note-tb-btn" title="Lista" onclick="insertMd('- ','')">•</button>
+      <button class="note-tb-btn" onclick="togglePreview()">👁</button>
+    </div>
+    <div id="noteWriteWrap" class="form-group"><textarea class="note-textarea" id="noteText" placeholder="Escreve o que está na cabeça..." oninput="autosave()"></textarea></div>
+    <div id="notePreviewWrap" class="form-group hidden"><div class="note-preview" id="notePreview"></div></div>
+    <button class="btn btn-primary btn-block" onclick="saveNote()">💾 Guardar Insight</button>
+    <div class="divider"></div>
+    <div class="note-search"><input type="text" id="noteSearch" placeholder="Pesquisar notas..." oninput="renderNotes()"></div>
+    <div id="savedNotesList"></div>
+  </div>
+  <!-- TODO -->
+  <div class="capture-panel" id="captureTodo">
+    <div class="flex mb-6 gap-2"><input type="text" id="quickTodoInput" placeholder="Nova tarefa rápida..." onkeydown="if(event.key==='Enter')addQuickTodo()" style="flex:1"><button class="btn btn-primary btn-sm" onclick="addQuickTodo()">+</button></div>
+    <div id="quickTodoList"></div>
+  </div>
+</div>
+
+<!-- ═══════════ MODAIS ═══════════ -->
+<!-- KANBAN -->
+<div class="modal-overlay" id="kanbanModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><div class="modal-title">Nova Quest</div><button class="btn-close btn" onclick="closeModal('kanbanModal')">✕</button></div>
+    <div class="form-group"><label class="label">Título</label><input type="text" id="kTitle" placeholder="Ex: ATV 2 — ADMBD"></div>
+    <div class="form-group"><label class="label">Prazo</label><input type="date" id="kDate"></div>
+    <div class="form-group"><label class="label">Categoria</label><select id="kCat"><option value="academico">🎓 Académico</option><option value="carreira">💻 Carreira</option><option value="arte">🎨 Arte</option><option value="pessoal">🧠 Pessoal</option></select></div>
+    <div class="form-group"><label class="label">Prioridade</label><div class="chip-group"><div class="chip active" data-val="normal" onclick="selectChip(this,'kPriority')">Normal</div><div class="chip" data-val="urgente" onclick="selectChip(this,'kPriority')">🔴 Urgente</div></div></div>
+    <input type="hidden" id="kPriority" value="normal">
+    <div class="form-group"><label class="label">Subtarefas (opcional, uma por linha)</label><textarea id="kSubs" placeholder="Ex: Ler capítulo 3&#10;Fazer exercícios" style="min-height:80px"></textarea></div>
+    <button class="btn btn-primary btn-block mt-5" onclick="saveKanban()">Criar Quest</button>
+  </div>
+</div>
+<!-- RITO -->
+<div class="modal-overlay" id="ritoModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><div class="modal-title">Novo Ritmo</div><button class="btn-close btn" onclick="closeModal('ritoModal')">✕</button></div>
+    <div class="form-group"><label class="label">Nome</label><input type="text" id="rName" placeholder="Ex: Praticar guitarra 20min"></div>
+    <div class="form-group"><label class="label">Tipo</label><div class="chip-group"><div class="chip active" data-val="manutencao" onclick="selectChip(this,'rType')">⚙️ Manutenção</div><div class="chip" data-val="abastecimento" onclick="selectChip(this,'rType')">🎨 Criativo</div></div></div>
+    <input type="hidden" id="rType" value="manutencao">
+    <div class="form-group"><label class="label">Emoji</label><input type="text" id="rEmoji" placeholder="🌿" maxlength="2" style="font-size:1.6rem;text-align:center"></div>
+    <button class="btn btn-primary btn-block mt-5" onclick="saveRito()">Criar Ritmo</button>
+  </div>
+</div>
+<!-- FASE -->
+<div class="modal-overlay" id="phaseModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><div class="modal-title">Nova Fase</div><button class="btn-close btn" onclick="closeModal('phaseModal')">✕</button></div>
+    <div class="form-group"><label class="label">Nome</label><input type="text" id="phaseName" placeholder="Ex: SQL Avançado"></div>
+    <div class="form-group"><label class="label">Emoji</label><input type="text" id="phaseEmoji" placeholder="🗄️" maxlength="2" style="font-size:1.6rem;text-align:center"></div>
+    <div class="form-group"><label class="label">Skills (uma por linha)</label><textarea id="phaseSkills" placeholder="SELECT, FROM, WHERE&#10;GROUP BY e HAVING&#10;JOINs"></textarea></div>
+    <button class="btn btn-primary btn-block mt-5" onclick="savePhase()">Criar Fase</button>
+  </div>
+</div>
+<!-- AVATAR -->
+<div class="modal-overlay" id="avatarModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><div class="modal-title">Teu Perfil</div><button class="btn-close btn" onclick="closeModal('avatarModal')">✕</button></div>
+    <div class="form-group"><label class="label">Nome</label><input type="text" id="profileNameInput" placeholder="O teu nome" oninput="autosave()"></div>
+    <div class="form-group"><label class="label">Avatar</label><div class="chip-group" id="avatarPickerModal" style="justify-content:center;font-size:1.8rem"></div></div>
+    <button class="btn btn-primary btn-block mt-5" onclick="saveProfile()">Guardar</button>
+  </div>
+</div>
+
+<script type="module">
+import './js/app.js';
+import { renderMetrics } from './modules/metrics.js';
+import { renderNotes, renderQuickTodos } from './modules/capture.js';
+window.renderMetrics = renderMetrics;
+window.renderNotes = renderNotes;
+window.renderQuickTodos = renderQuickTodos;
+</script>
+</body>
+</html>
