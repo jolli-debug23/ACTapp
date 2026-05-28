@@ -1,0 +1,78 @@
+/* ═══════════════════════════════════════════════
+   LAB PESSOAL v3 — TEMAS
+═══════════════════════════════════════════════ */
+
+/* ── TEMA: FANTASIA ── */
+[data-theme="fantasy"] {
+  --bg:        #080612;
+  --bg2:       #0e0a1c;
+  --surface:   #150f28;
+  --surface2:  #1e1738;
+  --elevated:  #2a2050;
+  --border:    rgba(180,140,255,0.08);
+  --border2:   rgba(180,140,255,0.16);
+  --border3:   rgba(180,140,255,0.28);
+  --accent:    #a78bfa;
+  --accent2:   #c4b5fd;
+  --accent-dim:rgba(167,139,250,0.18);
+  --accent-glow:rgba(167,139,250,0.35);
+  --emerald:   #6ee7b7;
+  --emerald-dim:rgba(110,231,183,0.13);
+  --gold:      #fcd34d;
+  --gold-dim:  rgba(252,211,77,0.15);
+  --rose:      #f9a8d4;
+  --rose-dim:  rgba(249,168,212,0.12);
+  --warn:      #fda172;
+  --warn-dim:  rgba(253,161,114,0.12);
+  --text:      #ede9fe;
+  --text2:     #7c6faa;
+  --text3:     #2e2548;
+}
+
+/* ── TEMA: CLARO ── */
+[data-theme="light"] {
+  --bg:        #f2f2f8;
+  --bg2:       #e8e8f2;
+  --surface:   #ffffff;
+  --surface2:  #f6f6fc;
+  --elevated:  #ededf8;
+  --border:    rgba(0,0,0,0.08);
+  --border2:   rgba(0,0,0,0.14);
+  --border3:   rgba(0,0,0,0.24);
+  --accent:    #6d4fc4;
+  --accent2:   #7c5ce7;
+  --accent-dim:rgba(109,79,196,0.1);
+  --accent-glow:rgba(109,79,196,0.22);
+  --emerald:   #059669;
+  --emerald-dim:rgba(5,150,105,0.1);
+  --gold:      #d97706;
+  --gold-dim:  rgba(217,119,6,0.1);
+  --rose:      #e11d48;
+  --rose-dim:  rgba(225,29,72,0.08);
+  --warn:      #ea580c;
+  --warn-dim:  rgba(234,88,12,0.1);
+  --text:      #1a1a2e;
+  --text2:     #5858808a;
+  --text2:     #585880;
+  --text3:     #c8c8e0;
+}
+
+/* Ajustes claro específicos */
+[data-theme="light"] input,
+[data-theme="light"] textarea,
+[data-theme="light"] select {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.18);
+}
+[data-theme="light"] .nav-bar {
+  background: rgba(255,255,255,0.92);
+  border-top-color: rgba(0,0,0,0.1);
+}
+[data-theme="light"] .screen-header {
+  background: rgba(242,242,248,0.95);
+  border-bottom-color: rgba(0,0,0,0.08);
+}
+[data-theme="light"] .drawer,
+[data-theme="light"] .modal {
+  background: #ffffff;
+}

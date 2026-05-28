@@ -1,0 +1,306 @@
+/* ═══════════════════════════════════════════════
+   LAB PESSOAL v3 — LAYOUT
+═══════════════════════════════════════════════ */
+
+/* ── APP SHELL ── */
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  position: relative;
+}
+
+/* ── SCREENS ── */
+.screen {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  padding-bottom: calc(var(--nav-h) + var(--safe-b) + 12px);
+}
+.screen.active {
+  display: flex;
+  animation: screen-in 0.3s var(--t-out);
+}
+
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5) var(--page-pad) var(--space-3);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── SCREEN HEADER ── */
+.screen-header {
+  padding: var(--space-4) var(--page-pad) var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 20;
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  min-height: 60px;
+}
+.screen-title {
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  line-height: 1.1;
+}
+.screen-sub {
+  font-size: var(--fs-sm);
+  color: var(--text2);
+  margin-top: 3px;
+  font-weight: 400;
+}
+
+/* ── BOTTOM NAV BAR ── */
+.nav-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: calc(var(--nav-h) + var(--safe-b));
+  background: rgba(26, 26, 38, 0.94);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 var(--space-1) var(--safe-b);
+  z-index: 100;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--space-2) var(--space-1);
+  border-radius: var(--r-sm);
+  color: var(--text2);
+  transition: all var(--t);
+  min-height: 54px; /* generous touch target */
+  position: relative;
+  overflow: hidden;
+}
+.nav-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--accent-dim);
+  opacity: 0;
+  transition: opacity var(--t);
+  border-radius: var(--r-sm);
+}
+.nav-item.active { color: var(--accent2); }
+.nav-item.active::before { opacity: 1; }
+.nav-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  display: block;
+  transition: transform 0.3s var(--t-spring);
+}
+.nav-item.active .nav-icon { transform: scale(1.25); }
+.nav-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+/* ── CAPTURE FAB ── */
+.capture-fab {
+  position: fixed;
+  bottom: calc(var(--nav-h) + var(--safe-b) + 16px);
+  right: 16px;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  box-shadow: 0 4px 28px var(--accent-glow), var(--sh-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  z-index: 99;
+  transition: all var(--t-spring);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+.capture-fab:active { transform: scale(0.9); }
+
+/* ── DRAWER ── */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.68);
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+.drawer {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  border-top: 1.5px solid var(--border2);
+  padding: 0 var(--page-pad) calc(var(--safe-b) + 24px);
+  z-index: 201;
+  transform: translateY(100%);
+  transition: transform 0.34s cubic-bezier(0.32,0.72,0,1);
+  max-height: 91dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.drawer.open { transform: translateY(0); }
+.drawer-handle {
+  width: 40px; height: 4px;
+  background: var(--border2);
+  border-radius: 2px;
+  margin: 14px auto 18px;
+}
+.drawer-title {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-4);
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.78);
+  z-index: 300;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--surface);
+  border: 1.5px solid var(--border2);
+  border-radius: 24px 24px 0 0;
+  padding: 0 var(--page-pad) calc(var(--safe-b) + 26px);
+  width: 100%;
+  max-height: 93dvh;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.34s cubic-bezier(0.32,0.72,0,1);
+  box-shadow: var(--sh);
+  -webkit-overflow-scrolling: touch;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-handle {
+  width: 40px; height: 4px;
+  background: var(--border2);
+  border-radius: 2px;
+  margin: 14px auto 16px;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-5);
+}
+.modal-title {
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* ── KANBAN LAYOUT ── */
+.kanban-toolbar {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  overflow-x: auto;
+  padding-bottom: var(--space-1);
+}
+.kanban-cols {
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  padding-bottom: var(--space-3);
+  align-items: flex-start;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+.kanban-col {
+  flex-shrink: 0;
+  width: 82vw;
+  max-width: 310px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  scroll-snap-align: start;
+}
+.kanban-col-hd {
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  min-height: 52px;
+}
+.kanban-col-title {
+  font-size: var(--fs-base);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.kanban-col-badge {
+  font-family: var(--mono);
+  font-size: var(--fs-xs);
+  color: var(--text2);
+  background: var(--elevated);
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+}
+.kanban-cards-area {
+  padding: var(--space-3);
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ── RITMOS SECTION TITLES ── */
+.ritmos-section { margin-bottom: var(--space-5); }
+.ritmos-section-title {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.ritmos-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
